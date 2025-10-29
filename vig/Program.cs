@@ -18,6 +18,7 @@ namespace vig
         static double glossMult = 1.0;
         static int blurRadius = 3;
         static double contrast = 0.5;
+        static double metalMult = 7.6; // the lower this value is, the more transparent the _cm files are
         static int thumbW = 164, thumbH = 12;
 
         static void Main(string[] args)
@@ -42,6 +43,7 @@ namespace vig
                 switch (args[i].ToLower())
                 {
                     case "--metal": metalOffset = int.Parse(args[++i]); break;
+                    case "--metalmult": metalMult = double.Parse(args[++i]); break;
                     case "--gloss": glossMult = double.Parse(args[++i]); break;
                     case "--blur": blurRadius = int.Parse(args[++i]); break;
                     case "--contrast": contrast = double.Parse(args[++i]); break;
@@ -97,7 +99,7 @@ namespace vig
                     result = MakeNormalGloss(source, glossMult);
                     break;
                 case FileType.CM:
-                    result = MakeColorMetal(source, metalOffset);
+                    result = MakeColorMetal(source, metalOffset, metalMult);
                     break;
                 case FileType.DISTANCE:
                     result = MakeDistance(source, blurRadius * 4, contrast);
@@ -107,9 +109,50 @@ namespace vig
                     break;
             }
             result.Save(fileName, ImageFormat.Png);
-            Console.WriteLine("Filename {0} done.", fileName);
+            Console.Write(" done.", fileName);
         }
         // ---- _cm ----
+        static Bitmap MakeColorMetal(Bitmap src, int metalOffset, double metalMult)
+        {
+            // Copy original RGB untouched
+            Bitmap result = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.DrawImage(src, 0, 0, src.Width, src.Height);
+            }
+
+            Rectangle rect = new Rectangle(0, 0, result.Width, result.Height);
+            BitmapData data = result.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            int bytes = Math.Abs(stride) * result.Height;
+            byte[] buffer = new byte[bytes];
+            System.Runtime.InteropServices.Marshal.Copy(data.Scan0, buffer, 0, bytes);
+
+            // Compute toned-down metalness alpha
+            for (int y = 0; y < result.Height; y++)
+            {
+                int offset = y * stride;
+                for (int x = 0; x < result.Width; x++)
+                {
+                    int idx = offset + x * 4;
+                    byte b = buffer[idx];
+                    byte gVal = buffer[idx + 1];
+                    byte r = buffer[idx + 2];
+                    int gray = (int)(0.3 * r + 0.59 * gVal + 0.11 * b);
+
+                    int alpha = (int)Math.Min(255, (gray * metalMult) + metalOffset);
+                    buffer[idx + 3] = (byte)alpha;
+                }
+            }
+
+            System.Runtime.InteropServices.Marshal.Copy(buffer, 0, data.Scan0, bytes);
+            result.UnlockBits(data);
+            return result;
+        }
+
+
+        /*
         static Bitmap MakeColorMetal(Bitmap src, int metalOffset)
         {
             // Copy original RGB as-is
@@ -145,7 +188,7 @@ namespace vig
 
             return result;
         }
-
+        */
         // ---- _ng ----
         static Bitmap MakeNormalGloss(Bitmap src, double glossMult)
         {
