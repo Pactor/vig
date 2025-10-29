@@ -1,0 +1,72 @@
+## Build directories
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+x64/
+x86/
+[Dd]ebug*/
+[Rr]elease*/
+artifacts/
+out/
+
+## Visual Studio / IDE
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+*.nuget.props
+*.nuget.targets
+
+## Cache / Temp files
+*.cache
+*.tmp
+*.temp
+*.obj
+*.pdb
+*.mdb
+*.ilk
+*.log
+*.svclog
+
+## Publish
+[Pp]ublishProfiles/
+*.pubxml
+*.publishproj
+publish/
+
+## Test artifacts
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+*.trx
+
+## System / OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Miscellaneous
+*.bak
+*.old
+*.orig
+*.swp
+*.swo
+
+## JetBrains / Rider
+.idea/
+*.DotSettings.user
+
+## Auto-generated
+Generated_Code/
+
+## Config (optional, comment out if you want to keep it)
+launchSettings.json
