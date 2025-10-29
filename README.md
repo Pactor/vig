@@ -29,6 +29,8 @@ Switch	Default	Description
 
 --metal <int>	30	Adjusts metalness offset. Higher values increase the metallic effect in _cm and _ng maps.
 
+--metalmult <double> 7.6 Adjusts the final aplha of _cm files.
+
 --gloss <float>	1.0	Multiplier for gloss intensity. Use >1.0 for shinier surfaces.
 
 --blur <int>	3	Controls blur radius for the _distance map. Larger values give a smoother depth effect.
